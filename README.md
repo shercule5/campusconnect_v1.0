@@ -1,50 +1,42 @@
-# Welcome to your Expo app 👋
+How to Run and Test the App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+To run Campus Connect on your computer, first install the project dependencies:
 
-## Get started
+npm install
 
-1. Install dependencies
+Then start the Expo development server:
 
-   ```bash
-   npm install
-   ```
+npx expo start
 
-2. Start the app
+Once the server starts, Expo will show a QR code and a few options for opening the app.
 
-   ```bash
-   npx expo start
-   ```
+Testing on a phone
 
-In the output, you'll find options to open the app in a
+The easiest way to test the app is with Expo Go.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Download Expo Go on your iPhone or Android.
+Make sure your phone and computer are on the same Wi-Fi network.
+Run:
+npx expo start
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Scan the QR code with your phone.
+The app should open in Expo Go.
+Testing on a simulator
 
-## Get a fresh project
+You can also test the app on a simulator.
 
-When you're ready, run:
+Press i in the terminal for the iOS simulator on Mac
 
-```bash
-npm run reset-project
-```
+Press a for the Android emulator
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Important note
 
-## Learn more
+If the app uses a backend server, that server must also be running for features like chatbots, database calls, to work. sorry.
 
-To learn more about developing your project with Expo, look at the following resources:
+Start the frontend with:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+npx expo start
 
-## Join the community
+And start the backend separately with:
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+node server.js
