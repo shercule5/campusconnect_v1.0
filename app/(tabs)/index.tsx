@@ -13,7 +13,12 @@ import {
   View,
 } from 'react-native';
 import { Post, PostType, usePosts } from '../../context/PostsContext';
-import { courses } from '../../data/courses';
+import {
+  communities,
+  courses,
+  getCourseCommunity,
+  normalizeCourseCode,
+} from '../../data/courses';
 
 type SortOption = 'Latest' | 'Most Liked';
 
@@ -32,39 +37,12 @@ type CommentThreadMap = Record<string, FeedComment[]>;
 
 function getCommunityFromCourse(course: string): string {
   if (course === 'Campus General') return 'Campus General';
-  if (course.startsWith('CSCI')) return 'Computer Science';
-  if (course.startsWith('MATH')) return 'Mathematics';
-  if (course.startsWith('PHYS')) return 'Physics';
-  if (course.startsWith('BIOL')) return 'Biology';
-  if (course.startsWith('CHEM')) return 'Chemistry';
-  if (course.startsWith('PSYC')) return 'Psychology';
-  if (
-    course.startsWith('MGMT') ||
-    course.startsWith('MKTG') ||
-    course.startsWith('ACCT') ||
-    course.startsWith('ECON')
-  ) {
-    return 'Business';
-  }
-  if (course.startsWith('ENGR')) return 'Engineering';
-  if (course.startsWith('ENG')) return 'Writing';
-  if (course.startsWith('SOC')) return 'Sociology';
-  return 'General';
+  return getCourseCommunity(course);
 }
 
 const COMMUNITY_OPTIONS = [
   'All Communities',
-  'Campus General',
-  'Computer Science',
-  'Mathematics',
-  'Physics',
-  'Biology',
-  'Chemistry',
-  'Psychology',
-  'Business',
-  'Engineering',
-  'Writing',
-  'Sociology',
+  ...communities.filter((community) => community !== 'All Communities'),
 ];
 
 const POST_TYPE_OPTIONS: Array<'All Types' | PostType> = [
@@ -129,7 +107,7 @@ const seededStudentComments: FeedComment[] = [
     replies: [
       {
         id: 1006,
-        text: 'Do you mind sharing them in the class community?',
+        text: 'Can you post them in the class community?',
       },
     ],
   },
@@ -139,7 +117,7 @@ const seededStudentComments: FeedComment[] = [
     replies: [
       {
         id: 1007,
-        text: 'Good to know. I might go this week.',
+        text: 'Good looks, I might go this week.',
       },
     ],
   },
@@ -212,8 +190,11 @@ function FeedPostCard({
 
           <View style={styles.tagRow}>
             <View style={styles.communityTag}>
-              <Text style={styles.communityTagText}>{item.community}</Text>
+              <Text style={styles.communityTagText}>
+                {getCommunityFromCourse(item.course)}
+              </Text>
             </View>
+
             <View style={styles.typeTag}>
               <Text style={styles.typeTagText}>{item.postType}</Text>
             </View>
@@ -236,6 +217,7 @@ function FeedPostCard({
               color={liked ? '#EF4444' : '#CBD5E1'}
             />
           </Animated.View>
+
           <Text style={[styles.actionText, liked && styles.likedText]}>
             {item.likes}
           </Text>
@@ -338,18 +320,18 @@ export default function FeedScreen() {
     const seededThreads: CommentThreadMap = {};
 
     posts.forEach((post, postIndex) => {
-      const oldDisplayedCommentCount =
+      const commentCount =
         typeof post.comments === 'number' && post.comments > 0
-          ? post.comments
+          ? Math.min(post.comments, seededStudentComments.length)
           : postIndex % 3 === 0
             ? 2
             : postIndex % 3 === 1
               ? 1
               : 0;
 
-      if (oldDisplayedCommentCount > 0) {
+      if (commentCount > 0) {
         seededThreads[post.id] = seededStudentComments
-          .slice(0, oldDisplayedCommentCount)
+          .slice(0, commentCount)
           .map((comment, commentIndex) => ({
             ...comment,
             id: 10000 + postIndex * 100 + commentIndex,
@@ -386,7 +368,10 @@ export default function FeedScreen() {
 
     if (trimmed) {
       result = result.filter((post) => {
+        const postCommunity = getCommunityFromCourse(post.course);
+
         const haystack = [
+          postCommunity,
           post.community,
           post.course,
           post.postType,
@@ -402,11 +387,16 @@ export default function FeedScreen() {
     }
 
     if (selectedCommunity !== 'All Communities') {
-      result = result.filter((post) => post.community === selectedCommunity);
+      result = result.filter(
+        (post) => getCommunityFromCourse(post.course) === selectedCommunity
+      );
     }
 
     if (selectedCourse !== 'All Classes') {
-      result = result.filter((post) => post.course === selectedCourse);
+      result = result.filter(
+        (post) =>
+          normalizeCourseCode(post.course) === normalizeCourseCode(selectedCourse)
+      );
     }
 
     if (selectedPostType !== 'All Types') {
@@ -658,21 +648,25 @@ export default function FeedScreen() {
                   <Text style={styles.activeChipText}>{selectedCommunity}</Text>
                 </View>
               )}
+
               {selectedCourse !== 'All Classes' && (
                 <View style={styles.activeChip}>
                   <Text style={styles.activeChipText}>{selectedCourse}</Text>
                 </View>
               )}
+
               {selectedPostType !== 'All Types' && (
                 <View style={styles.activeChip}>
                   <Text style={styles.activeChipText}>{selectedPostType}</Text>
                 </View>
               )}
+
               {selectedSort !== 'Latest' && (
                 <View style={styles.activeChip}>
                   <Text style={styles.activeChipText}>{selectedSort}</Text>
                 </View>
               )}
+
               {activeFilterCount === 0 && searchText.trim().length === 0 && (
                 <View style={styles.activeChipMuted}>
                   <Text style={styles.activeChipMutedText}>All posts</Text>
